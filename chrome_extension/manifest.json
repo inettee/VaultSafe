@@ -1,0 +1,33 @@
+{
+  "manifest_version": 3,
+  "name": "VaultSafe for Chrome",
+  "description": "Lưu mục vào VaultSafe và đối chiếu tên miền của tab đang mở.",
+  "version": "0.4.0",
+  "minimum_chrome_version": "127",
+  "permissions": ["nativeMessaging", "activeTab"],
+  "host_permissions": ["https://*/*"],
+  "background": { "service_worker": "background.js" },
+  "action": { "default_popup": "popup.html", "default_title": "VaultSafe" },
+  "content_scripts": [
+    {
+      "matches": [
+        "http://localhost:8765/vaultsafe-demo/",
+        "https://vaultsafe-demo.test:8766/vaultsafe-demo/login",
+        "https://vaultsafe-demo.test:8766/vaultsafe-demo/inline",
+        "https://vaultsafe-demo.test:8766/vaultsafe-demo/account*",
+        "https://vaultsafe-dialog.test:8766/vaultsafe-demo/inline",
+        "https://vaultsafe-dialog.test:8766/vaultsafe-demo/steps"
+      ],
+      "js": ["sites.js", "protocol.js", "save_session.js", "prompt.js", "site_login.js"]
+    },
+    {
+      "matches": ["https://*/*"],
+      "exclude_matches": [
+        "https://vaultsafe-demo.test:8766/vaultsafe-demo/*",
+        "https://vaultsafe-dialog.test:8766/vaultsafe-demo/*"
+      ],
+      "js": ["sites.js", "protocol.js", "form_login.js"],
+      "run_at": "document_start"
+    }
+  ]
+}

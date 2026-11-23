@@ -1,0 +1,8 @@
+customtkinter==5.2.2
+Pillow>=10,<13
+argon2-cffi>=25.1,<26
+cryptography>=46,<50
+pywin32>=311,<313; sys_platform == "win32"
+beautifulsoup4>=4.12,<5
+idna>=3.7,<4
+tldextract>=5.3,<6

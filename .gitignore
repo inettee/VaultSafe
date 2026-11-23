@@ -1,0 +1,14 @@
+.venv/
+.idea/
+.vscode/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+vaultsafe.db*
+*.vaultkey
+*.vaultsafe
+security_preferences.json
+.env
+.env.*
+*.pem
+*.key

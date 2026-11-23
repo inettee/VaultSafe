@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <title>VaultSafe</title>
+  <style>
+    body { width: 300px; margin: 0; padding: 16px; color-scheme: dark;
+      background: #101c32; color: #f1f5f9; font: 14px/1.45 system-ui, sans-serif; }
+    h1 { font-size: 17px; margin: 0 0 10px; }
+    p { color: #bacbe2; margin: 0 0 8px; overflow-wrap: anywhere; }
+    button { border: 0; border-radius: 7px; padding: 6px 10px; background: #2563eb;
+      color: white; font: inherit; cursor: pointer; }
+    button:disabled { opacity: .55; cursor: default; }
+    .secondary { background: #26364f; }
+    .actions { display: flex; flex-wrap: wrap; gap: 8px; }
+    form { margin-top: 12px; padding-top: 10px; border-top: 1px solid #425b81; }
+    #form-offer, #tab-result { margin: 12px 0; padding: 10px; border: 1px solid #425b81; border-radius: 6px; }
+    #tab-result ul { color: #bacbe2; margin: 0 0 8px; padding-left: 20px; overflow-wrap: anywhere; }
+    #tab-status:not(:empty) { margin-top: 10px; }
+    h2 { font-size: 15px; margin: 0 0 8px; }
+    button[hidden], section[hidden] { display: none; }
+    label { display: block; margin-bottom: 8px; }
+    input { box-sizing: border-box; display: block; width: 100%; margin-top: 3px; padding: 6px;
+      border: 1px solid #425b81; border-radius: 6px; background: #0b1120; color: inherit; font: inherit; }
+    #manual-message:not(:empty) { margin-top: 10px; }
+  </style>
+  <script src="sites.js" defer></script>
+  <script src="protocol.js" defer></script>
+  <script src="save_session.js" defer></script>
+  <script src="popup.js" defer></script>
+  <script src="check_popup.js" defer></script>
+  <script src="form_popup.js" defer></script>
+</head>
+<body>
+  <h1>VaultSafe</h1>
+  <p id="status" role="status">Đang kiểm tra…</p>
+  <p id="profile" hidden></p>
+  <section id="form-offer" hidden aria-labelledby="form-question">
+    <h2 id="form-question">Lưu thông tin vừa nhập?</h2>
+    <p>Website <strong id="form-site"></strong></p>
+    <p>Hồ sơ đích <strong id="form-profile"></strong></p>
+    <p>Chỉ đọc thông tin còn trên biểu mẫu sau khi bạn bấm Lưu.</p>
+    <div class="actions">
+      <button id="form-save" type="button">Lưu</button>
+      <button id="form-skip" class="secondary" type="button">Bỏ qua</button>
+    </div>
+  </section>
+  <p id="form-message" role="status"></p>
+  <div class="actions">
+    <button id="form-find" type="button">Lưu vào VaultSafe</button>
+    <button id="add-current" type="button">Thêm mục cho trang này</button>
+    <button id="check-tab" type="button">Kiểm tra trang này</button>
+    <button id="refresh" class="secondary" type="button">Kiểm tra lại</button>
+  </div>
+  <p id="tab-status" role="status"></p>
+  <section id="tab-result" hidden aria-labelledby="tab-risk">
+    <h2 id="tab-risk"></h2>
+    <p>Hostname <strong id="tab-hostname"></strong></p>
+    <p>Tên miền đăng ký <strong id="tab-domain"></strong></p>
+    <p id="tab-profile"></p>
+    <ul id="tab-findings"></ul>
+    <p>Chỉ đối chiếu địa chỉ. Chưa kiểm tra nội dung trang.</p>
+  </section>
+  <form id="manual" autocomplete="off" hidden>
+    <p>Hồ sơ đích <strong id="manual-profile">Đang kiểm tra…</strong></p>
+    <label>URL <input id="manual-url" type="url" readonly></label>
+    <label>Tên đăng nhập <input id="manual-user" type="text" maxlength="128" required></label>
+    <label>Mật khẩu <input id="manual-password" type="password" maxlength="256" required></label>
+    <div class="actions">
+      <button id="manual-save" type="submit">Lưu</button>
+      <button id="manual-cancel" class="secondary" type="button">Bỏ qua</button>
+    </div>
+  </form>
+  <p id="manual-message" role="status"></p>
+</body>
+</html>
