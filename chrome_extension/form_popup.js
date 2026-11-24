@@ -1,7 +1,9 @@
 "use strict";
 
 (() => {
+  const entry = document.getElementById("form-entry");
   const panel = document.getElementById("form-offer");
+  const question = document.getElementById("form-question");
   const site = document.getElementById("form-site");
   const profile = document.getElementById("form-profile");
   const save = document.getElementById("form-save");
@@ -15,12 +17,15 @@
   function close(text = "") {
     offer = null;
     panel.hidden = true;
+    entry.hidden = false;
     message.textContent = text;
   }
 
   async function load(op, showError = true) {
     if (looking) return;
     looking = find.disabled = save.disabled = true;
+    const findingForm = op === "form_find";
+    if (findingForm) message.textContent = "Đang tìm biểu mẫu đăng nhập…";
     try {
       const [tab] = await chrome.tabs.query({active: true, currentWindow: true}).catch(() => []);
       const response = await vaultRequest({op, tabId: tab?.id});
@@ -32,12 +37,15 @@
       showConnection(response);
       const ready = response.code === "ready";
       offer = {id: response.id, ready, update: response.update};
+      question.textContent = response.automatic ? "Lưu thông tin vừa nhập?" : "Xác nhận lưu từ biểu mẫu";
       site.textContent = response.site;
       if (ready || panel.hidden) profile.textContent = response.profile || "Chưa sẵn sàng";
       save.textContent = ready ? offer.update ? "Cập nhật" : "Lưu" : "Thử lại";
       skip.disabled = false;
       message.textContent = ready ? "" : STATUS_TEXT[response.code] || STATUS_TEXT.host_error;
       panel.hidden = false;
+      entry.hidden = true;
+      if (findingForm) question.focus();
     } finally {
       looking = find.disabled = save.disabled = false;
     }

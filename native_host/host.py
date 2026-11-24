@@ -10,6 +10,7 @@ if __package__ in (None, ""):
     sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from vaultsafe.browser_protocol import MAX_MESSAGE, decode_message, encode_message, valid_request
+from vaultsafe.chrome_registration import EXTENSION_ORIGIN
 
 
 LENGTH = struct.Struct("<I")
@@ -29,7 +30,12 @@ def read_request(stream):
 
 
 def main():
-    if len(sys.argv) < 3 or sys.argv[1] != sys.argv[2]:
+    if getattr(sys, "frozen", False):
+        valid_origin = len(sys.argv) >= 2 and sys.argv[1] == EXTENSION_ORIGIN
+    else:
+        # The source-only developer launcher passes the expected origin first.
+        valid_origin = len(sys.argv) >= 3 and sys.argv[1] == sys.argv[2]
+    if not valid_origin:
         return 1
     try:
         request = read_request(sys.stdin.buffer)

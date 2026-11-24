@@ -1,0 +1,27 @@
+VaultSafe cho Windows x64
+
+1. Giải nén toàn bộ gói VaultSafe-Windows-x64.
+2. Mở VaultSafe.exe. Giữ thư mục _internal cạnh ứng dụng.
+3. Nếu đã dùng VaultSafe trên máy này, chọn hồ sơ cũ và dùng mật khẩu
+   chính hiện có. Kho nằm ở %LOCALAPPDATA%\VaultSafe.
+
+Cài tiện ích VaultSafe cho Chrome
+
+1. Mở Thiet-lap-Chrome.exe và bấm Kết nối và mở Chrome.
+2. Trong Chrome, bật Chế độ dành cho nhà phát triển (Developer mode).
+3. Bấm Tải tiện ích đã giải nén (Load unpacked). Dán đường dẫn đã
+   được chép sẵn vào hộp chọn thư mục rồi chọn chrome_extension.
+4. Mở VaultSafe.exe và mở khóa kho. Trong Chrome, bấm biểu tượng
+   Tiện ích (mảnh ghép) rồi chọn VaultSafe for Chrome.
+
+Nếu Chrome đang dùng thư mục tiện ích của gói cũ, gỡ tiện ích đó rồi
+chọn chrome_extension từ gói mới. Kho vẫn nằm trên máy.
+
+Trên trang tương thích, điền tài khoản rồi mở tiện ích trước khi bấm
+Đăng nhập. Chọn Lưu vào VaultSafe, kiểm tra website và hồ sơ đích,
+sau đó bấm Lưu. Nếu biểu mẫu đã biến mất, chọn Nhập thủ công.
+
+Nếu di chuyển thư mục ứng dụng, mở lại Thiet-lap-Chrome.exe từ vị trí
+mới và tải lại tiện ích từ thư mục mới trong Chrome.
+
+Để gỡ kết nối, mở Thiet-lap-Chrome.exe và bấm Ngắt kết nối.

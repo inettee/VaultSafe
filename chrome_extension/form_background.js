@@ -18,17 +18,51 @@ function clearFormOffer(tabId, notify = true) {
   if (notify) void chrome.runtime.sendMessage({op: "form_ended", id: offer.id}).catch(() => {});
 }
 
-async function activeFormTab(tabId) {
+async function activeFormTab(tabId, {requireWindowFocus = false} = {}) {
   if (!Number.isInteger(tabId)) return null;
   try {
     const tab = await chrome.tabs.get(tabId);
     const url = manualUrl(tab.url);
-    if (tab.active && url.startsWith("https://") &&
-        (await chrome.windows.get(tab.windowId)).focused) return {...tab, url};
+    if (!tab.active || !url.startsWith("https://")) return null;
+    // The trusted toolbar popup can take focus away from its Chrome window.
+    if (requireWindowFocus && !(await chrome.windows.get(tab.windowId)).focused) return null;
+    return {...tab, url, documentUrl: tab.url};
   } catch {
     // The tab or browser window may have closed.
   }
   return null;
+}
+
+async function locateForm(tabId) {
+  const tab = await activeFormTab(tabId);
+  if (!tab) return {code: "form_tab_inactive"};
+  const request = {op: "form_locate"};
+  let located;
+  try {
+    located = await chrome.tabs.sendMessage(tabId, request, {frameId: 0});
+  } catch {
+    // A tab opened before the extension was loaded or reloaded has no listener yet.
+    if (tab.url.startsWith(HTTPS_DEMO_ROOT) || tab.url.startsWith(DIALOG_DEMO_ROOT)) {
+      return {code: "form_unavailable"};
+    }
+    try {
+      const [top] = await chrome.scripting.executeScript({
+        target: {tabId, frameIds: [0]},
+        files: ["sites.js", "protocol.js", "form_login.js"],
+      });
+      const current = await activeFormTab(tabId);
+      if (!top?.documentId || current?.documentUrl !== tab.documentUrl) {
+        return {code: "form_stale"};
+      }
+      located = await chrome.tabs.sendMessage(tabId, request, {documentId: top.documentId});
+    } catch {
+      return {code: "form_unavailable"};
+    }
+  }
+  if (located?.code === "pending") return formContext(tabId, "form_stale");
+  const code = ["form_not_detected", "form_ambiguous"].includes(located?.code) ?
+    located.code : "form_stale";
+  return {code};
 }
 
 function offerCurrent(offer, tab) {
@@ -36,11 +70,11 @@ function offerCurrent(offer, tab) {
     Date.now() < offer.expires && tab.url === offer.url;
 }
 
-async function formContext(tabId) {
+async function formContext(tabId, missingCode = "form_missing") {
   const offer = formOffers.get(tabId);
-  if (!offer || !offerCurrent(offer, await activeFormTab(tabId))) return {code: "form_missing"};
+  if (!offer || !offerCurrent(offer, await activeFormTab(tabId))) return {code: missingCode};
   const response = await nativeRequest({op: "status"});
-  if (!offerCurrent(offer, await activeFormTab(tabId))) return {code: "form_missing"};
+  if (!offerCurrent(offer, await activeFormTab(tabId))) return {code: missingCode};
   if (response.code === "ready") {
     if (offer.target && offer.target !== response.target) {
       clearFormOffer(tabId, false);
@@ -49,7 +83,7 @@ async function formContext(tabId) {
     offer.target = response.target;
   }
   return {id: offer.id, site: new URL(offer.url).hostname, profile: response.profile,
-    code: response.code, update: Boolean(offer.confirmation)};
+    code: response.code, update: Boolean(offer.confirmation), automatic: offer.automatic};
 }
 
 async function saveForm(message) {
@@ -102,13 +136,14 @@ async function formMessage(message, sender, popup) {
     if (sender.documentLifecycle !== "active") return {code: "invalid"};
     clearFormOffer(tabId);
     const offer = {id: message.id, tabId, url, documentId: sender.documentId,
-      expires: Date.now() + FORM_OFFER_TIMEOUT, target: "", confirmation: "", busy: false};
+      expires: Date.now() + FORM_OFFER_TIMEOUT, target: "", confirmation: "", busy: false,
+      automatic: message.automatic === true};
     formOffers.set(tabId, offer);
     offer.timer = setTimeout(() => clearFormOffer(tabId), FORM_OFFER_TIMEOUT);
-    if (message.automatic === true) {
+    if (offer.automatic) {
       void chrome.action.setBadgeText({tabId, text: "?"}).catch(() => {});
       offer.openTimer = setTimeout(async () => {
-        const tab = await activeFormTab(tabId);
+        const tab = await activeFormTab(tabId, {requireWindowFocus: true});
         if (offerCurrent(offer, tab)) await chrome.action.openPopup({windowId: tab.windowId}).catch(() => {});
       }, 200);
     }
@@ -116,12 +151,7 @@ async function formMessage(message, sender, popup) {
   }
   if (!popup) return {code: "invalid"};
   if (message.op === "form_context") return formContext(message.tabId);
-  if (message.op === "form_find") {
-    if (!await activeFormTab(message.tabId)) return {code: "form_missing"};
-    const located = await chrome.tabs.sendMessage(message.tabId, {op: "form_locate"}, {frameId: 0})
-      .catch(() => ({code: "form_missing"}));
-    return located?.code === "pending" ? formContext(message.tabId) : {code: "form_missing"};
-  }
+  if (message.op === "form_find") return locateForm(message.tabId);
   if (message.op === "form_save") return saveForm(message);
   if (message.op === "form_skip") {
     if (formOffers.get(message.tabId)?.id === message.id) clearFormOffer(message.tabId, false);

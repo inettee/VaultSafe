@@ -13,6 +13,7 @@
     button:disabled { opacity: .55; cursor: default; }
     .secondary { background: #26364f; }
     .actions { display: flex; flex-wrap: wrap; gap: 8px; }
+    .save-entry, .other-actions { margin-top: 12px; padding-top: 10px; border-top: 1px solid #425b81; }
     form { margin-top: 12px; padding-top: 10px; border-top: 1px solid #425b81; }
     #form-offer, #tab-result { margin: 12px 0; padding: 10px; border: 1px solid #425b81; border-radius: 6px; }
     #tab-result ul { color: #bacbe2; margin: 0 0 8px; padding-left: 20px; overflow-wrap: anywhere; }
@@ -35,21 +36,25 @@
   <h1>VaultSafe</h1>
   <p id="status" role="status">Đang kiểm tra…</p>
   <p id="profile" hidden></p>
+  <section id="form-entry" class="save-entry" aria-labelledby="form-entry-title">
+    <h2 id="form-entry-title">Lưu từ biểu mẫu</h2>
+    <p id="form-find-help">Điền thông tin trên website. Trước khi gửi biểu mẫu, bấm nút dưới đây rồi xác nhận lưu vào hồ sơ.</p>
+    <button id="form-find" type="button" aria-controls="form-offer" aria-describedby="form-find-help">Lưu vào VaultSafe</button>
+  </section>
   <section id="form-offer" hidden aria-labelledby="form-question">
-    <h2 id="form-question">Lưu thông tin vừa nhập?</h2>
+    <h2 id="form-question" tabindex="-1">Xác nhận lưu từ biểu mẫu</h2>
     <p>Website <strong id="form-site"></strong></p>
     <p>Hồ sơ đích <strong id="form-profile"></strong></p>
-    <p>Chỉ đọc thông tin còn trên biểu mẫu sau khi bạn bấm Lưu.</p>
+    <p>Kiểm tra website và hồ sơ đích. VaultSafe đọc thông tin trên biểu mẫu khi bạn bấm Lưu.</p>
     <div class="actions">
       <button id="form-save" type="button">Lưu</button>
       <button id="form-skip" class="secondary" type="button">Bỏ qua</button>
     </div>
   </section>
   <p id="form-message" role="status"></p>
-  <div class="actions">
-    <button id="form-find" type="button">Lưu vào VaultSafe</button>
-    <button id="add-current" type="button">Thêm mục cho trang này</button>
-    <button id="check-tab" type="button">Kiểm tra trang này</button>
+  <div class="actions other-actions">
+    <button id="add-current" class="secondary" type="button" aria-controls="manual">Nhập thủ công</button>
+    <button id="check-tab" class="secondary" type="button">Kiểm tra trang này</button>
     <button id="refresh" class="secondary" type="button">Kiểm tra lại</button>
   </div>
   <p id="tab-status" role="status"></p>
